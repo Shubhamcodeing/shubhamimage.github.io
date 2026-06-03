@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luxury Real Estate Slider 3D</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+        body {
+            margin: 0;
+            background-color: #000;
+            color: #eee;
+            font-family: Poppins, sans-serif;
+            font-size: 12px;
+            overflow: hidden;
+            /* Add perspective to the body for global 3D feel */
+            perspective: 1200px;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        /* slider section  */
+        .slider {
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            position: relative;
+            /* Enable 3D space for children */
+            transform-style: preserve-3d;
+        }
+
+        .slider .list .item {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            inset: 0 0 0 0;
+            opacity: 0;
+            /* Ensure children can be 3D transformed */
+            transform-style: preserve-3d;
+            transition: opacity 0.5s ease-in-out;
+            /* Smooth filter transition for the blur effect */
+            filter: blur(0px);
+        }
+
+        /* Show the active first item */
+        .slider .list .item:nth-child(1) {
+            opacity: 1;
+            z-index: 1;
+        }
+
+        .slider .list .item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Add a subtle transform for the parallax script to hook into */
+            transition: transform 0.1s ease-out;
+            transform: scale(1.1); /* Slight zoom to prevent edges during 3D tilt */
+        }
+
+        .slider .list .item .content {
+            position: absolute;
+            top: 20%;
+            width: 1140px;
+            max-width: 80%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding-right: 30%;
+            box-sizing: border-box;
+            color: #fff;
+            text-shadow: 0 5px 10px rgba(0,0,0,0.4);
+            z-index: 10;
+            transform-style: preserve-3d; /* 3D context for text */
+            pointer-events: none; /* Let clicks pass through to image if needed */
+        }
+
+        .slider .list .item .content .title,
+        .slider .list .item .content .type {
+            font-size: 5em;
+            font-weight: bold;
+            line-height: 1.3em;
+            /* Prepare for 3D transform */
+            transform: translateZ(20px); 
+        }
+
+        .slider .list .item .type {
+            color: #14ff72cb;
+        }
+        
+        .slider .list .item .description {
+            margin-top: 20px;
+            font-size: 1.2em;
+            transform: translateZ(30px); /* Push description slightly back */
+        }
+
+        .slider .list .item .button {
+            display: grid;
+            grid-template-columns: repeat(2, 130px);
+            grid-template-rows: 40px;
+            gap: 5px;
+            margin-top: 20px;
+            transform: translateZ(40px); /* Push buttons further back */
+        }
+
+        .slider .list .item .button button {
+            border: none;
+            background-color: #eee;
+            font-family: Poppins;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.4s;
+            letter-spacing: 2px;
+        }
+
+        .slider .list .item .button button:hover {
+            letter-spacing: 3px;
+        }
+
+        .slider .list .item .button button:nth-child(2) {
+            background-color: transparent;
+            border: 1px solid #fff;
+            color: #eee;
+        }
+
+        /* Thumbnail Section  */
+        .thumbnail {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: max-content;
+            z-index: 100;
+            display: flex;
+            gap: 20px;
+            perspective: 1000px; /* 3D perspective for thumbnails */
+        }
+
+        .thumbnail .item {
+            width: 150px;
+            height: 220px;
+            flex-shrink: 0;
+            position: relative;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        
+        /* Hover effect for thumbnails - slight 3D tilt */
+        .thumbnail .item:hover {
+            transform: translateY(-10px) scale(1.05);
+            z-index: 10;
+        }
+
+        .thumbnail .item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 20px;
+            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* nextPrevArrows Section  */
+        .nextPrevArrows {
+            position: absolute;
+            z-index: 100;
+            width: 300px;
+            max-width: 30%;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .nextPrevArrows button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #14ff72cb;
+            border: none;
+            color: #fff;
+            font-family: monospace;
+            font-weight: bold;
+            transition: .5s;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(20, 255, 114, 0.3);
+        }
+
+        .nextPrevArrows button:hover {
+            background-color: #fff;
+            color: #000;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        /* animation text in first item */
+        .slider .list .item:nth-child(1) .content .title,
+        .slider .list .item:nth-child(1) .content .type,
+        .slider .list .item:nth-child(1) .content .description,
+        .slider .list .item:nth-child(1) .content .button {
+            transform: translateY(50px);
+            filter: blur(20px);
+            opacity: 0;
+            animation: showContent .5s 0.8s linear 1 forwards;
+        }
+
+        @keyframes showContent {
+            to {
+                transform: translateY(0px);
+                filter: blur(0px);
+                opacity: 1;
+            }
+        }
+
+        .slider .list .item:nth-child(1) .content .title { animation-delay: 0.2s !important; }
+        .slider .list .item:nth-child(1) .content .type { animation-delay: 0.4s !important; }
+        .slider .list .item:nth-child(1) .content .description { animation-delay: 0.6s !important; }
+        .slider .list .item:nth-child(1) .content .button { animation-delay: 0.8s !important; }
+
+        /* 
+           3D ANIMATION UPDATES 
+           The key is combining TranslateZ (depth) and RotateX (tilt)
+        */
+
+        /* Animation for NEXT (Enter animation) */
+        .slider.next .list .item:nth-child(1) img {
+            width: 150px;
+            height: 220px;
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            border-radius: 30px;
+            
+            /* Initial State (Start): Small, far back (Z), tilted (X), blurred */
+            animation: showImage3D .8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            z-index: 2; 
+        }
+
+        @keyframes showImage3D {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, 0) scale(0.6) rotateX(45deg) translateZ(-300px);
+                filter: blur(10px);
+            }
+            100% {
+                opacity: 1;
+                /* Final State: Full screen, flat (0deg), front (0px), sharp */
+                transform: translate(-50%, 0) scale(1) rotateX(0deg) translateZ(0);
+                filter: blur(0);
+            }
+        }
+
+        .slider.next .thumbnail .item:nth-last-child(1) {
+            overflow: hidden;
+            animation: showThumbnail .5s linear 1 forwards;
+        }
+
+        .slider.prev .list .item img {
+            z-index: 100;
+        }
+
+        @keyframes showThumbnail {
+            from {
+                width: 0;
+                opacity: 0;
+            }
+        }
+
+        .slider.next .thumbnail {
+            animation: effectNext .5s linear 1 forwards;
+        }
+
+        @keyframes effectNext {
+            from {
+                transform: translateX(150px);
+            }
+        }
+
+        /* Animation for PREV (Exit animation) */
+        .slider.prev .list .item:nth-child(2) {
+            z-index: 2;
+            opacity: 1;
+        }
+
+        .slider.prev .list .item:nth-child(2) img {
+            animation: outFrame3D 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            z-index: 2;
+        }
+
+        @keyframes outFrame3D {
+            0% {
+                opacity: 1;
+                transform: scale(1) rotateX(0deg) translateZ(0);
+                filter: blur(0);
+            }
+            100% {
+                opacity: 0;
+                /* Exit State: Shrink, tilt back, push back in Z-space */
+                width: 150px;
+                height: 220px;
+                bottom: 50px;
+                left: 50%;
+                border-radius: 20px;
+                transform: translate(-50%, 0) scale(0.6) rotateX(-45deg) translateZ(-300px);
+                filter: blur(10px);
+                z-index: 2;
+            }
+        }
+
+        .slider.prev .thumbnail .item:nth-child(1) {
+            overflow: hidden;
+            opacity: 0;
+            animation: showThumbnail .5s linear 1 forwards;
+        }
+
+        .slider.prev .list .item:nth-child(2) .content .title,
+        .slider.prev .list .item:nth-child(2) .content .type,
+        .slider.prev .list .item:nth-child(2) .content .description,
+        .slider.prev .list .item:nth-child(2) .content .button {
+            animation: contentOut 0.5s linear 1 forwards !important;
+        }
+
+        @keyframes contentOut {
+            to {
+                transform: translateY(-150px);
+                filter: blur(20px);
+                opacity: 0;
+            }
+        }
+
+        @media screen and (max-width: 678px) {
+            .slider .list .item .content {
+                padding-right: 0;
+                text-align: center;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 90%;
+            }
+            .slider .list .item .content .title { font-size: 3em; }
+            .slider .list .item .type { font-size: 2em; }
+            .thumbnail { display: none; }
+            .nextPrevArrows { bottom: 30px; }
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="slider">
+        <div class="list">
+            <div class="item">
+                <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=1920" alt="Luxury Villa">
+                <div class="content">
+                    <div class="title">EXCLUSIVE LIVING</div>
+                    <div class="type">LUXURY VILLA</div>
+                    <div class="description">
+                        Experience the epitome of modern elegance. This architectural masterpiece offers expansive glass facades, custom infinity pools, and panoramic sunset views designed for an elevated lifestyle.
+                    </div>
+                    <div class="button">
+                        <button class="action-btn">VIEW TOUR</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="item">
+                <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&q=80&w=1920" alt="Modern Mansion">
+                <div class="content">
+                    <div class="title">MINIMALIST DESIGN</div>
+                    <div class="type">MODERN MANSION</div>
+                    <div class="description">
+                        Where clean lines meet unparalleled comfort. A premium estate boasting smart-home automated systems, private courtyards, and museum-grade gallery spaces.
+                    </div>
+                    <div class="button">
+                        <button class="action-btn">VIEW TOUR</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="item">
+                <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1920" alt="Urban Penthouse">
+                <div class="content">
+                    <div class="title">SKYLINE DWELLING</div>
+                    <div class="type">PENTHOUSE</div>
+                    <div class="description">
+                        Perched high above the city skyline. This multi-level luxury duplex features floor-to-ceiling windows, wrap-around observation terraces, and private elevator entry access points.
+                    </div>
+                    <div class="button">
+                        <button class="action-btn">VIEW TOUR</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="item">
+                <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=1920" alt="Coastal Estate">
+                <div class="content">
+                    <div class="title">OCEANFRONT SANCTUARY</div>
+                    <div class="type">COASTAL ESTATE</div>
+                    <div class="description">
+                        Wake up to tranquil breaking tides. An exclusive estate blending local limestone architectural structures with contemporary resort aesthetics alongside direct private beach walkways.
+                    </div>
+                    <div class="button">
+                        <button class="action-btn">VIEW TOUR</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="thumbnail">
+            <div class="item">
+                <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=300" alt="">
+            </div>
+            <div class="item">
+                <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&q=80&w=300" alt="">
+            </div>
+            <div class="item">
+                <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=300" alt="">
+            </div>
+            <div class="item">
+                <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=300" alt="">
+            </div>
+        </div>
+
+        <div class="nextPrevArrows">
+            <button class="prev"> &lt; </button>
+            <button class="next"> &gt; </button>
+        </div>
+    </div>
+
+    <script>
+        let nextBtn = document.querySelector('.next');
+        let prevBtn = document.querySelector('.prev');
+
+        let slider = document.querySelector('.slider');
+        let sliderList = slider.querySelector('.slider .list');
+        let thumbnail = document.querySelector('.slider .thumbnail');
+        
+        // State lock flag to resolve rapid spamming click conflicts safely
+        let isAnimating = false;
+
+        // Sync visual thumbnail track stack safely instantly on start
+        let initialThumbnails = thumbnail.querySelectorAll('.item');
+        if(initialThumbnails.length > 0) {
+            thumbnail.appendChild(initialThumbnails[0]);
+        }
+
+        nextBtn.onclick = function() {
+            if (isAnimating) return;
+            moveSlider('next');
+        }
+
+        prevBtn.onclick = function() {
+            if (isAnimating) return;
+            moveSlider('prev');
+        }
+
+        function moveSlider(direction) {
+            isAnimating = true; // Block incoming button interactions during animation run
+            
+            let sliderItems = sliderList.querySelectorAll('.item');
+            let thumbnailItems = thumbnail.querySelectorAll('.item');
+            
+            if(direction === 'next'){
+                sliderList.appendChild(sliderItems[0]);
+                thumbnail.appendChild(thumbnailItems[0]);
+                slider.classList.add('next');
+            } else {
+                sliderList.prepend(sliderItems[sliderItems.length - 1]);
+                thumbnail.prepend(thumbnailItems[thumbnailItems.length - 1]);
+                slider.classList.add('prev');
+            }
+
+            // Cleanup architecture once the absolute longest runtime transformation finishes
+            slider.addEventListener('animationend', function() {
+                slider.classList.remove('next');
+                slider.classList.remove('prev');
+                isAnimating = false; // Open state gate lock back up for next inputs
+            }, {once: true});
+        }
+
+        // --- NEW: 3D MOUSE PARALLAX EFFECT ---
+        // This adds the interactive "Scrolling" feel as you move the mouse
+        document.addEventListener('mousemove', (e) => {
+            const activeItem = document.querySelector('.slider .list .item:nth-child(1)');
+            if (!activeItem) return;
+
+            const img = activeItem.querySelector('img');
+            const content = activeItem.querySelector('.content');
+
+            // Calculate mouse position relative to center of screen (-1 to 1)
+            const x = (e.clientX / window.innerWidth - 0.5) * 2;
+            const y = (e.clientY / window.innerHeight - 0.5) * 2;
+
+            // Apply subtle 3D rotation to the image
+            // RotateY affects left/right tilt, RotateX affects up/down tilt
+            if (img) {
+                // Move the image slightly opposite to mouse for depth
+                gsap.to(img, {
+                    x: -x * 10, // Move image X
+                    y: -y * 10, // Move image Y
+                    rotationY: x * 5, // Tilt image Y
+                    rotationX: -y * 5, // Tilt image X
+                    duration: 0.5,
+                    ease: 'power2.out'
+                });
+            }
+
+            // Move text content with less intensity to create layers
+            if (content) {
+                gsap.to(content, {
+                    x: -x * 20,
+                    y: -y * 20,
+                    rotationY: x * 2,
+                    rotationX: -y * 2,
+                    duration: 0.5,
+                    ease: 'power2.out'
+                });
+            }
+        });
+    </script>
+    
+    <!-- Added GSAP for smoother parallax math, though you could do it with vanilla JS too -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</body>
+</html>
